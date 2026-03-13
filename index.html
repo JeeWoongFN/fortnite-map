@@ -117,10 +117,6 @@ map.on("click", function(e) {
     // 새 핑 생성
     currentPing = L.marker([y, x]).addTo(map);
 
-    // 팝업 표시
-    currentPing.bindPopup(
-        "📍 좌표<br>X: " + x + "<br>Y: " + y
-    ).openPopup();
 
 });
 
