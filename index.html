@@ -20,7 +20,7 @@ width:100%;
 height:100%;
 }
 
-/* POI 이름 */
+/* POI */
 
 .poi-label{
 background:rgba(0,0,0,0);
@@ -95,8 +95,8 @@ margin-top:6px;
 
 var map = L.map('map',{
 crs: L.CRS.Simple,
-minZoom: -1,
-maxZoom: 2,
+minZoom:-1,
+maxZoom:2,
 zoomSnap:0.25
 });
 
@@ -106,12 +106,12 @@ var bounds = [[0,0],[2048,2048]];
 
 /* 맵 이미지 */
 
-var image = L.imageOverlay("map.png", bounds).addTo(map);
+L.imageOverlay("map.png", bounds).addTo(map);
 
 map.fitBounds(bounds);
 map.setZoom(-0.3);
 
-/* POI 함수 */
+/* POI */
 
 function addPOI(y,x,name){
 
@@ -181,38 +181,43 @@ shadowSize:[41,41]
 
 };
 
-/* 도구 상태 */
+/* 상태 변수 */
 
-let currentTool = "ping";
-let lineStart = null;
-let pingColor = "red";
+let currentTool="ping";
+let pingColor="red";
+
+let linePoints=[];
+let previewLine=null;
 
 /* 도구 선택 */
 
 function setTool(tool){
-currentTool = tool;
-lineStart = null;
+currentTool=tool;
+linePoints=[];
+if(previewLine){
+map.removeLayer(previewLine);
+previewLine=null;
+}
 }
 
-/* 색상 선택 */
+/* 색상 */
 
 function setPingColor(color){
-pingColor = color;
+pingColor=color;
 }
 
 /* 지도 클릭 */
 
-map.on("click", function(e){
+map.on("click",function(e){
 
-const x = e.latlng.lng;
-const y = e.latlng.lat;
+const point=[e.latlng.lat,e.latlng.lng];
 
-/* 핑 도구 */
+/* 핑 */
 
-if(currentTool === "ping"){
+if(currentTool==="ping"){
 
-const marker = L.marker([y,x],{
-icon: pingIcons[pingColor]
+const marker=L.marker(point,{
+icon:pingIcons[pingColor]
 }).addTo(map);
 
 marker.on("contextmenu",function(){
@@ -221,51 +226,68 @@ map.removeLayer(marker);
 
 }
 
-/* 선 도구 */
+/* 선 */
 
-if(currentTool === "line"){
+if(currentTool==="line"){
 
-const point = [y,x];
+if(linePoints.length>0){
 
-/* 시작점 */
+const last=linePoints[linePoints.length-1];
 
-if(!lineStart){
-lineStart = point;
-lastPoint = point;
-return;
-}
-
-/* 마지막 점 클릭 → 종료 */
+/* 같은 점 클릭 → 종료 */
 
 if(
-Math.abs(lastPoint[0]-point[0]) < 1 &&
-Math.abs(lastPoint[1]-point[1]) < 1
+Math.abs(last[0]-point[0])<5 &&
+Math.abs(last[1]-point[1])<5
 ){
-lineStart = null;
-lastPoint = null;
+linePoints=[];
+if(previewLine){
+map.removeLayer(previewLine);
+previewLine=null;
+}
 return;
 }
 
-/* 선 그리기 */
+/* 선 추가 */
 
-L.polyline(
-[
-lastPoint,
-point
-],
-{
-color: pingColor,
+L.polyline([last,point],{
+color:pingColor,
 weight:4
-}
-).addTo(map);
-
-lastPoint = point;
+}).addTo(map);
 
 }
 
-/* 브라우저 우클릭 메뉴 막기 */
+linePoints.push(point);
 
-map.getContainer().addEventListener("contextmenu", function(e){
+}
+
+});
+
+/* 선 미리보기 */
+
+map.on("mousemove",function(e){
+
+if(currentTool!=="line") return;
+if(linePoints.length===0) return;
+
+const last=linePoints[linePoints.length-1];
+const point=[e.latlng.lat,e.latlng.lng];
+
+if(previewLine){
+map.removeLayer(previewLine);
+}
+
+previewLine=L.polyline([last,point],{
+color:pingColor,
+weight:2,
+dashArray:"5,5"
+}).addTo(map);
+
+});
+
+/* 우클릭 메뉴 차단 */
+
+map.getContainer().addEventListener("contextmenu",function(e){
 e.preventDefault();
 });
 
