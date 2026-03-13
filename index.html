@@ -33,37 +33,6 @@ text-shadow:
 -2px -2px 4px black;
 }
 
-/* 핑 애니메이션 */
-
-.ping-marker{
-width:18px;
-height:18px;
-border-radius:50%;
-position:relative;
-}
-
-.ping-marker::after{
-content:'';
-position:absolute;
-width:18px;
-height:18px;
-border-radius:50%;
-left:0;
-top:0;
-animation: pingPulse 1.5s infinite;
-}
-
-@keyframes pingPulse{
-0%{
-transform:scale(1);
-opacity:0.9;
-}
-100%{
-transform:scale(3);
-opacity:0;
-}
-}
-
 /* 핑 색상 버튼 */
 
 #pingControls{
@@ -158,8 +127,49 @@ addPOI(664,1048,"서스 스튜디오");
 addPOI(614,1291,"클래시파이드 캐니언");
 
 
+/* 핑 아이콘 */
 
-/* 핑 시스템 */
+const pingIcons = {
+
+red: new L.Icon({
+iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+iconSize:[25,41],
+iconAnchor:[12,41],
+popupAnchor:[1,-34],
+shadowSize:[41,41]
+}),
+
+blue: new L.Icon({
+iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
+shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+iconSize:[25,41],
+iconAnchor:[12,41],
+popupAnchor:[1,-34],
+shadowSize:[41,41]
+}),
+
+green: new L.Icon({
+iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+iconSize:[25,41],
+iconAnchor:[12,41],
+popupAnchor:[1,-34],
+shadowSize:[41,41]
+}),
+
+yellow: new L.Icon({
+iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png",
+shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+iconSize:[25,41],
+iconAnchor:[12,41],
+popupAnchor:[1,-34],
+shadowSize:[41,41]
+})
+
+};
+
+/* 핑 색상 */
 
 let pingColor = "red";
 
@@ -167,25 +177,33 @@ function setPingColor(color){
 pingColor = color;
 }
 
+/* 현재 핑 저장 */
+
+let currentPing = null;
+
 /* 핑 생성 */
 
 map.on("click", function(e){
 
-const icon = L.divIcon({
-className:'',
-html:`<div class="ping-marker" style="background:${pingColor}"></div>`,
-iconSize:[18,18],
-iconAnchor:[9,9]
-});
+const x = e.latlng.lng;
+const y = e.latlng.lat;
 
-const marker = L.marker(e.latlng,{
-icon:icon
+/* 기존 핑 제거 */
+
+if(currentPing){
+map.removeLayer(currentPing);
+}
+
+/* 새 핑 생성 */
+
+currentPing = L.marker([y,x],{
+icon: pingIcons[pingColor]
 }).addTo(map);
 
 /* 우클릭 삭제 */
 
-marker.on("contextmenu",function(){
-map.removeLayer(marker);
+currentPing.on("contextmenu",function(){
+map.removeLayer(currentPing);
 });
 
 });
