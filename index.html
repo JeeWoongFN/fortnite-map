@@ -90,6 +90,30 @@ addPOI(1200,1500,"슬랩 주스 공장");
 addPOI(600,800,"기울어진 탑");
 
 
+// 현재 핑 저장
+let currentPing = null;
+
+// 지도 클릭 이벤트
+map.on("click", function(e) {
+
+    let x = Math.round(e.latlng.lng);
+    let y = Math.round(e.latlng.lat);
+
+    // 기존 핑 제거
+    if(currentPing){
+        map.removeLayer(currentPing);
+    }
+
+    // 새 핑 생성
+    currentPing = L.marker([y, x]).addTo(map);
+
+    // 팝업 표시
+    currentPing.bindPopup(
+        "📍 좌표<br>X: " + x + "<br>Y: " + y
+    ).openPopup();
+
+});
+
 </script>
 
 </body>
