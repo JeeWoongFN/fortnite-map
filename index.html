@@ -47,8 +47,10 @@ text-shadow:
 
 // 지도 생성
 var map = L.map('map', {
-crs: L.CRS.Simple,
-minZoom:-2
+    crs: L.CRS.Simple,
+    minZoom: -1,
+    maxZoom: 2,
+    zoomSnap: 0.25
 });
 
 // 맵 이미지 크기 (현재 map.webp 기준)
@@ -59,6 +61,7 @@ var image = L.imageOverlay("map.png", bounds).addTo(map);
 
 // 지도 중앙 맞추기
 map.fitBounds(bounds);
+map.setZoom(0);
 
 
 // 📍 지역 이름 추가 함수
