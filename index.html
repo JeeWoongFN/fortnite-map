@@ -177,9 +177,7 @@ function setPingColor(color){
 pingColor = color;
 }
 
-/* 현재 핑 저장 */
 
-let currentPing = null;
 
 /* 핑 생성 */
 
@@ -188,11 +186,6 @@ map.on("click", function(e){
 const x = e.latlng.lng;
 const y = e.latlng.lat;
 
-/* 기존 핑 제거 */
-
-if(currentPing){
-map.removeLayer(currentPing);
-}
 
 /* 새 핑 생성 */
 
