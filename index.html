@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <title>Fortnite Map</title>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
 
 html, body{
 margin:0;
+padding:0;
 height:100%;
-background:#1e1e1e;
+background:#111;
 }
 
 #map{
@@ -20,7 +20,7 @@ width:100%;
 height:100%;
 }
 
-/* 지역 이름 스타일 */
+/* POI 이름 */
 
 .poi-label{
 background:rgba(0,0,0,0);
@@ -33,55 +33,114 @@ text-shadow:
 -2px -2px 4px black;
 }
 
-</style>
+/* 핑 애니메이션 */
 
+.ping-marker{
+width:18px;
+height:18px;
+border-radius:50%;
+position:relative;
+}
+
+.ping-marker::after{
+content:'';
+position:absolute;
+width:18px;
+height:18px;
+border-radius:50%;
+left:0;
+top:0;
+animation: pingPulse 1.5s infinite;
+}
+
+@keyframes pingPulse{
+0%{
+transform:scale(1);
+opacity:0.9;
+}
+100%{
+transform:scale(3);
+opacity:0;
+}
+}
+
+/* 핑 색상 버튼 */
+
+#pingControls{
+position:absolute;
+top:10px;
+right:10px;
+z-index:1000;
+background:rgba(0,0,0,0.5);
+padding:6px;
+border-radius:8px;
+}
+
+#pingControls button{
+font-size:20px;
+margin:2px;
+cursor:pointer;
+border:none;
+background:none;
+}
+
+</style>
 </head>
 
 <body>
 
 <div id="map"></div>
 
+<div id="pingControls">
+<button onclick="setPingColor('red')">🔴</button>
+<button onclick="setPingColor('blue')">🔵</button>
+<button onclick="setPingColor('green')">🟢</button>
+<button onclick="setPingColor('yellow')">🟡</button>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-// 지도 생성
-var map = L.map('map', {
-    crs: L.CRS.Simple,
-    minZoom: -1,
-    maxZoom: 2,
-    zoomSnap: 0.25
+/* 지도 생성 */
+
+var map = L.map('map',{
+crs: L.CRS.Simple,
+minZoom: -1,
+maxZoom: 2,
+zoomSnap:0.25
 });
 
-// 맵 이미지 크기 (현재 map.webp 기준)
+/* 맵 이미지 크기 */
+
 var bounds = [[0,0],[2048,2048]];
 
-// 맵 이미지 표시
+/* 맵 이미지 */
+
 var image = L.imageOverlay("map.png", bounds).addTo(map);
 
-// 지도 중앙 맞추기
 map.fitBounds(bounds);
-map.setZoom(-0.5);
 
+/* 시작 줌 */
 
-// 📍 지역 이름 추가 함수
+map.setZoom(-0.3);
 
-function addPOI(x, y, name){
+/* POI 함수 */
 
-L.marker([x,y],{
-opacity:0
-})
-.addTo(map)
-.bindTooltip(name,{
+function addPOI(y,x,name){
+
+L.tooltip({
 permanent:true,
 direction:"center",
 className:"poi-label"
-});
+})
+.setLatLng([y,x])
+.setContent(name)
+.addTo(map);
 
 }
 
-
-// 📍 지역 이름 표시 
+/* POI 위치 */
 
 addPOI(1438,704,"웡키랜드");
 addPOI(1366,444,"팁톱 테라스");
@@ -99,23 +158,35 @@ addPOI(664,1048,"서스 스튜디오");
 addPOI(614,1291,"클래시파이드 캐니언");
 
 
-// 현재 핑 저장
-let currentPing = null;
 
-// 지도 클릭 이벤트
-map.on("click", function(e) {
+/* 핑 시스템 */
 
-    const x = e.latlng.lng;
-    const y = e.latlng.lat;
+let pingColor = "red";
 
-    // 기존 핑 제거
-    if(currentPing){
-        map.removeLayer(currentPing);
-    }
+function setPingColor(color){
+pingColor = color;
+}
 
-    // 새 핑 생성
-    currentPing = L.marker([y, x]).addTo(map);
+/* 핑 생성 */
 
+map.on("click", function(e){
+
+const icon = L.divIcon({
+className:'',
+html:`<div class="ping-marker" style="background:${pingColor}"></div>`,
+iconSize:[18,18],
+iconAnchor:[9,9]
+});
+
+const marker = L.marker(e.latlng,{
+icon:icon
+}).addTo(map);
+
+/* 우클릭 삭제 */
+
+marker.on("contextmenu",function(){
+map.removeLayer(marker);
+});
 
 });
 
