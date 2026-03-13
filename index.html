@@ -33,24 +33,37 @@ text-shadow:
 -2px -2px 4px black;
 }
 
-/* 핑 색상 버튼 */
+/* 사이드바 */
 
-#pingControls{
+#toolbar{
 position:absolute;
-top:10px;
-right:10px;
+left:10px;
+top:50%;
+transform:translateY(-50%);
+background:#ff8c00;
+padding:8px;
+border-radius:10px;
 z-index:1000;
-background:rgba(0,0,0,0.5);
-padding:6px;
-border-radius:8px;
+display:flex;
+flex-direction:column;
+gap:6px;
 }
 
-#pingControls button{
-font-size:20px;
-margin:2px;
-cursor:pointer;
+#toolbar button{
+width:40px;
+height:40px;
+font-size:18px;
 border:none;
-background:none;
+border-radius:6px;
+cursor:pointer;
+background:white;
+}
+
+#colorPicker{
+display:flex;
+flex-direction:column;
+gap:4px;
+margin-top:6px;
 }
 
 </style>
@@ -60,11 +73,18 @@ background:none;
 
 <div id="map"></div>
 
-<div id="pingControls">
+<div id="toolbar">
+
+<button onclick="setTool('ping')">📍</button>
+<button onclick="setTool('line')">📏</button>
+
+<div id="colorPicker">
 <button onclick="setPingColor('red')">🔴</button>
 <button onclick="setPingColor('blue')">🔵</button>
 <button onclick="setPingColor('green')">🟢</button>
 <button onclick="setPingColor('yellow')">🟡</button>
+</div>
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -80,7 +100,7 @@ maxZoom: 2,
 zoomSnap:0.25
 });
 
-/* 맵 이미지 크기 */
+/* 맵 크기 */
 
 var bounds = [[0,0],[2048,2048]];
 
@@ -89,9 +109,6 @@ var bounds = [[0,0],[2048,2048]];
 var image = L.imageOverlay("map.png", bounds).addTo(map);
 
 map.fitBounds(bounds);
-
-/* 시작 줌 */
-
 map.setZoom(-0.3);
 
 /* POI 함수 */
@@ -126,7 +143,6 @@ addPOI(547,778,"배틀우드 불러바드");
 addPOI(664,1048,"서스 스튜디오");
 addPOI(614,1291,"클래시파이드 캐니언");
 
-
 /* 핑 아이콘 */
 
 const pingIcons = {
@@ -136,7 +152,6 @@ iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
 iconAnchor:[12,41],
-popupAnchor:[1,-34],
 shadowSize:[41,41]
 }),
 
@@ -145,7 +160,6 @@ iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
 iconAnchor:[12,41],
-popupAnchor:[1,-34],
 shadowSize:[41,41]
 }),
 
@@ -154,7 +168,6 @@ iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
 iconAnchor:[12,41],
-popupAnchor:[1,-34],
 shadowSize:[41,41]
 }),
 
@@ -163,46 +176,81 @@ iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
 iconAnchor:[12,41],
-popupAnchor:[1,-34],
 shadowSize:[41,41]
 })
 
 };
 
-/* 핑 색상 */
+/* 도구 상태 */
 
+let currentTool = "ping";
+let lineStart = null;
 let pingColor = "red";
+
+/* 도구 선택 */
+
+function setTool(tool){
+currentTool = tool;
+lineStart = null;
+}
+
+/* 색상 선택 */
 
 function setPingColor(color){
 pingColor = color;
 }
 
-
-
-/* 핑 생성 */
+/* 지도 클릭 */
 
 map.on("click", function(e){
 
 const x = e.latlng.lng;
 const y = e.latlng.lat;
 
+/* 핑 도구 */
 
-/* 새 핑 생성 */
+if(currentTool === "ping"){
 
-currentPing = L.marker([y,x],{
+const marker = L.marker([y,x],{
 icon: pingIcons[pingColor]
 }).addTo(map);
 
-/* 우클릭 삭제 */
-
-currentPing.on("contextmenu",function(){
-map.removeLayer(currentPing);
+marker.on("contextmenu",function(){
+map.removeLayer(marker);
 });
 
+}
+
+/* 선 도구 */
+
+if(currentTool === "line"){
+
+if(!lineStart){
+
+lineStart = [y,x];
+
+}else{
+
+L.polyline([
+lineStart,
+[y,x]
+],{
+color: pingColor,
+weight:4
+}).addTo(map);
+
+lineStart = null;
+
+}
+
+}
+
 });
+
+/* 브라우저 우클릭 메뉴 막기 */
 
 map.getContainer().addEventListener("contextmenu", function(e){
-    e.preventDefault();
+e.preventDefault();
 });
 
 </script>
