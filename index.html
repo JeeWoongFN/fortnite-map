@@ -225,27 +225,42 @@ map.removeLayer(marker);
 
 if(currentTool === "line"){
 
+const point = [y,x];
+
+/* 시작점 */
+
 if(!lineStart){
+lineStart = point;
+lastPoint = point;
+return;
+}
 
-lineStart = [y,x];
+/* 마지막 점 클릭 → 종료 */
 
-}else{
+if(
+Math.abs(lastPoint[0]-point[0]) < 1 &&
+Math.abs(lastPoint[1]-point[1]) < 1
+){
+lineStart = null;
+lastPoint = null;
+return;
+}
+
+/* 선 그리기 */
 
 L.polyline([
-lineStart,
-[y,x]
+lastPoint,
+point
 ],{
 color: pingColor,
 weight:4
 }).addTo(map);
 
-lineStart = null;
+lastPoint = point;
 
 }
 
 }
-
-});
 
 /* 브라우저 우클릭 메뉴 막기 */
 
