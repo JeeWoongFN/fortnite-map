@@ -20,40 +20,65 @@ width:100%;
 height:100%;
 }
 
+/* POI */
+
 .poi-label{
 background:rgba(0,0,0,0);
 border:none;
 color:white;
 font-size:18px;
 font-weight:bold;
-text-shadow:
-2px 2px 4px black,
--2px -2px 4px black;
+text-shadow:2px 2px 4px black,-2px -2px 4px black;
 }
+
+/* 사이드바 */
 
 #toolbar{
 position:absolute;
 left:10px;
 top:50%;
 transform:translateY(-50%);
-background:#ff8c00;
-padding:8px;
-border-radius:10px;
+background:rgba(20,20,20,0.75);
+backdrop-filter:blur(8px);
+padding:10px;
+border-radius:12px;
 z-index:1000;
 display:flex;
 flex-direction:column;
-gap:6px;
+gap:8px;
+box-shadow:0 0 15px rgba(0,0,0,0.6);
 }
 
+/* 버튼 기본 */
+
 #toolbar button{
-width:40px;
-height:40px;
+width:42px;
+height:42px;
 font-size:18px;
 border:none;
-border-radius:6px;
+border-radius:8px;
 cursor:pointer;
 background:white;
+transition:0.15s;
+box-shadow:0 0 6px rgba(0,0,0,0.4);
 }
+
+/* Hover */
+
+#toolbar button:hover{
+transform:scale(1.08);
+box-shadow:0 0 12px orange;
+}
+
+/* 선택 강조 */
+
+.selectedTool{
+background:#444 !important;
+color:white !important;
+box-shadow:0 0 10px orange !important;
+}
+
+/* 색상 선택 */
 
 #colorPicker{
 display:flex;
@@ -94,15 +119,15 @@ margin-top:6px;
 /* 지도 생성 */
 
 var map = L.map('map',{
-crs: L.CRS.Simple,
+crs:L.CRS.Simple,
 minZoom:-1,
 maxZoom:2,
 zoomSnap:0.25
 });
 
-var bounds = [[0,0],[2048,2048]];
+var bounds=[[0,0],[2048,2048]];
 
-L.imageOverlay("map.png", bounds).addTo(map);
+L.imageOverlay("map.png",bounds).addTo(map);
 
 map.fitBounds(bounds);
 map.setZoom(-0.3);
@@ -110,7 +135,6 @@ map.setZoom(-0.3);
 /* POI */
 
 function addPOI(y,x,name){
-
 L.tooltip({
 permanent:true,
 direction:"center",
@@ -119,7 +143,6 @@ className:"poi-label"
 .setLatLng([y,x])
 .setContent(name)
 .addTo(map);
-
 }
 
 /* POI */
@@ -141,8 +164,7 @@ addPOI(614,1291,"클래시파이드 캐니언");
 
 /* 핑 아이콘 */
 
-const pingIcons = {
-
+const pingIcons={
 red:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -150,7 +172,6 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
-
 blue:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -158,7 +179,6 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
-
 green:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -166,7 +186,6 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
-
 yellow:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -174,7 +193,6 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 })
-
 };
 
 /* 상태 */
@@ -201,13 +219,13 @@ map.removeLayer(previewLine);
 previewLine=null;
 }
 
+/* 버튼 강조 */
+
 document.querySelectorAll("#toolbar button").forEach(b=>{
-b.style.background="white";
-b.style.color="black";
+b.classList.remove("selectedTool");
 });
 
-btn.style.background="#444";
-btn.style.color="white";
+btn.classList.add("selectedTool");
 
 }
 
@@ -272,10 +290,7 @@ if(linePoints.length>0){
 
 const last=linePoints[linePoints.length-1];
 
-if(
-Math.abs(last[0]-point[0])<5 &&
-Math.abs(last[1]-point[1])<5
-){
+if(Math.abs(last[0]-point[0])<5 && Math.abs(last[1]-point[1])<5){
 linePoints=[];
 if(previewLine){
 map.removeLayer(previewLine);
@@ -387,13 +402,8 @@ historyStack.push(layer);
 
 document.addEventListener("keydown",function(e){
 
-if(e.ctrlKey && e.key==="z"){
-undoLast();
-}
-
-if(e.ctrlKey && e.key==="y"){
-redoLast();
-}
+if(e.ctrlKey && e.key==="z") undoLast();
+if(e.ctrlKey && e.key==="y") redoLast();
 
 });
 
