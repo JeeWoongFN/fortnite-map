@@ -190,7 +190,6 @@ let previewLine=null;
 
 /* 도구 선택 */
 
-function setTool(tool){
 function setTool(tool,btn){
 
 currentTool = tool;
@@ -221,15 +220,13 @@ function setPingColor(color,btn){
 
 pingColor=color;
 
-/* 색상 버튼 초기화 */
-
 document.querySelectorAll("#colorPicker button").forEach(b=>{
 b.style.outline="none";
 });
 
-/* 선택 표시 */
-
+if(btn){
 btn.style.outline="3px solid white";
+}
 
 }
 /* 지도 클릭 */
