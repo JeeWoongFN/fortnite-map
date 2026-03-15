@@ -75,14 +75,13 @@ margin-top:6px;
 
 <div id="toolbar">
 
-<button onclick="setTool('ping')">📍</button>
-<button onclick="setTool('line')">📏</button>
-
+<button onclick="setTool('ping',this)">📍</button>
+<button onclick="setTool('line',this)">📏</button>
 <div id="colorPicker">
-<button onclick="setPingColor('red')">🔴</button>
-<button onclick="setPingColor('blue')">🔵</button>
-<button onclick="setPingColor('green')">🟢</button>
-<button onclick="setPingColor('yellow')">🟡</button>
+<button onclick="setPingColor('red',this)">🔴</button>
+<button onclick="setPingColor('blue',this)">🔵</button>
+<button onclick="setPingColor('green',this)">🟢</button>
+<button onclick="setPingColor('yellow',this)">🟡</button>
 </div>
 
 </div>
@@ -192,20 +191,47 @@ let previewLine=null;
 /* 도구 선택 */
 
 function setTool(tool){
-currentTool=tool;
-linePoints=[];
+function setTool(tool,btn){
+
+currentTool = tool;
+
+linePoints = [];
+
 if(previewLine){
 map.removeLayer(previewLine);
 previewLine=null;
 }
+
+/* 모든 버튼 배경 초기화 */
+
+document.querySelectorAll("#toolbar button").forEach(b=>{
+b.style.background="white";
+});
+
+/* 선택 버튼 색 변경 */
+
+btn.style.background="#444";
+btn.style.color="white";
+
 }
 
 /* 색상 */
 
-function setPingColor(color){
-pingColor=color;
-}
+function setPingColor(color,btn){
 
+pingColor=color;
+
+/* 색상 버튼 초기화 */
+
+document.querySelectorAll("#colorPicker button").forEach(b=>{
+b.style.outline="none";
+});
+
+/* 선택 표시 */
+
+btn.style.outline="3px solid white";
+
+}
 /* 지도 클릭 */
 
 map.on("click",function(e){
