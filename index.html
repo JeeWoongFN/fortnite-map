@@ -181,16 +181,16 @@ let pingColor="red";
 let linePoints=[];
 let previewLine=null;
 
-/* Undo 스택 */
+/* Undo / Redo 스택 */
 
 let historyStack=[];
+let redoStack=[];
 
 /* 도구 선택 */
 
 function setTool(tool,btn){
 
 currentTool=tool;
-
 linePoints=[];
 
 if(previewLine){
@@ -237,6 +237,7 @@ icon:pingIcons[pingColor]
 }).addTo(map);
 
 historyStack.push(marker);
+redoStack=[];
 
 marker.on("contextmenu",function(){
 map.removeLayer(marker);
@@ -270,12 +271,11 @@ weight:4
 }).addTo(map);
 
 historyStack.push(line);
+redoStack=[];
 
 line.on("contextmenu",function(){
 map.removeLayer(line);
 });
-
-/* 끝점 */
 
 const dot=L.circleMarker(point,{
 radius:5,
@@ -286,10 +286,9 @@ fillOpacity:1
 }).addTo(map);
 
 historyStack.push(dot);
+redoStack=[];
 
 }
-
-/* 시작점 */
 
 if(linePoints.length===0){
 
@@ -302,6 +301,7 @@ fillOpacity:1
 }).addTo(map);
 
 historyStack.push(dot);
+redoStack=[];
 
 }
 
@@ -343,12 +343,34 @@ const last=historyStack.pop();
 
 map.removeLayer(last);
 
+redoStack.push(last);
+
 }
+
+/* Redo */
+
+function redoLast(){
+
+if(redoStack.length===0) return;
+
+const layer=redoStack.pop();
+
+layer.addTo(map);
+
+historyStack.push(layer);
+
+}
+
+/* 단축키 */
 
 document.addEventListener("keydown",function(e){
 
 if(e.ctrlKey && e.key==="z"){
 undoLast();
+}
+
+if(e.ctrlKey && e.key==="y"){
+redoLast();
 }
 
 });
