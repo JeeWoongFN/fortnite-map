@@ -20,8 +20,6 @@ width:100%;
 height:100%;
 }
 
-/* POI */
-
 .poi-label{
 background:rgba(0,0,0,0);
 border:none;
@@ -32,8 +30,6 @@ text-shadow:
 2px 2px 4px black,
 -2px -2px 4px black;
 }
-
-/* 사이드바 */
 
 #toolbar{
 position:absolute;
@@ -77,6 +73,7 @@ margin-top:6px;
 
 <button onclick="setTool('ping',this)">📍</button>
 <button onclick="setTool('line',this)">📏</button>
+
 <div id="colorPicker">
 <button onclick="setPingColor('red',this)">🔴</button>
 <button onclick="setPingColor('blue',this)">🔵</button>
@@ -99,11 +96,7 @@ maxZoom:2,
 zoomSnap:0.25
 });
 
-/* 맵 크기 */
-
 var bounds = [[0,0],[2048,2048]];
-
-/* 맵 이미지 */
 
 L.imageOverlay("map.png", bounds).addTo(map);
 
@@ -125,7 +118,7 @@ className:"poi-label"
 
 }
 
-/* POI 위치 */
+/* POI */
 
 addPOI(1438,704,"웡키랜드");
 addPOI(1366,444,"팁톱 테라스");
@@ -146,7 +139,7 @@ addPOI(614,1291,"클래시파이드 캐니언");
 
 const pingIcons = {
 
-red: new L.Icon({
+red:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
@@ -154,7 +147,7 @@ iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
 
-blue: new L.Icon({
+blue:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
@@ -162,7 +155,7 @@ iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
 
-green: new L.Icon({
+green:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
@@ -170,7 +163,7 @@ iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
 
-yellow: new L.Icon({
+yellow:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 iconSize:[25,41],
@@ -180,7 +173,7 @@ shadowSize:[41,41]
 
 };
 
-/* 상태 변수 */
+/* 상태 */
 
 let currentTool="ping";
 let pingColor="red";
@@ -188,33 +181,34 @@ let pingColor="red";
 let linePoints=[];
 let previewLine=null;
 
+/* Undo 스택 */
+
+let historyStack=[];
+
 /* 도구 선택 */
 
 function setTool(tool,btn){
 
-currentTool = tool;
+currentTool=tool;
 
-linePoints = [];
+linePoints=[];
 
 if(previewLine){
 map.removeLayer(previewLine);
 previewLine=null;
 }
 
-/* 모든 버튼 배경 초기화 */
-
 document.querySelectorAll("#toolbar button").forEach(b=>{
 b.style.background="white";
+b.style.color="black";
 });
-
-/* 선택 버튼 색 변경 */
 
 btn.style.background="#444";
 btn.style.color="white";
 
 }
 
-/* 색상 */
+/* 색상 선택 */
 
 function setPingColor(color,btn){
 
@@ -224,11 +218,10 @@ document.querySelectorAll("#colorPicker button").forEach(b=>{
 b.style.outline="none";
 });
 
-if(btn){
 btn.style.outline="3px solid white";
-}
 
 }
+
 /* 지도 클릭 */
 
 map.on("click",function(e){
@@ -242,6 +235,8 @@ if(currentTool==="ping"){
 const marker=L.marker(point,{
 icon:pingIcons[pingColor]
 }).addTo(map);
+
+historyStack.push(marker);
 
 marker.on("contextmenu",function(){
 map.removeLayer(marker);
@@ -257,8 +252,6 @@ if(linePoints.length>0){
 
 const last=linePoints[linePoints.length-1];
 
-/* 같은 점 클릭 → 종료 */
-
 if(
 Math.abs(last[0]-point[0])<5 &&
 Math.abs(last[1]-point[1])<5
@@ -271,39 +264,44 @@ previewLine=null;
 return;
 }
 
-/* 선 추가 */
-
-const line = L.polyline([last,point],{
+const line=L.polyline([last,point],{
 color:pingColor,
 weight:4
 }).addTo(map);
 
-/* 우클릭 삭제 */
+historyStack.push(line);
 
 line.on("contextmenu",function(){
 map.removeLayer(line);
 });
-/* 끝점 표시 */
 
-L.circleMarker(point,{
+/* 끝점 */
+
+const dot=L.circleMarker(point,{
 radius:5,
 color:"#000",
 weight:2,
 fillColor:"#fff",
 fillOpacity:1
 }).addTo(map);
+
+historyStack.push(dot);
 
 }
 
-if(linePoints.length === 0){
+/* 시작점 */
 
-L.circleMarker(point,{
+if(linePoints.length===0){
+
+const dot=L.circleMarker(point,{
 radius:5,
 color:"#000",
 weight:2,
 fillColor:"#fff",
 fillOpacity:1
 }).addTo(map);
+
+historyStack.push(dot);
 
 }
 
@@ -332,6 +330,26 @@ color:pingColor,
 weight:2,
 dashArray:"5,5"
 }).addTo(map);
+
+});
+
+/* Undo */
+
+function undoLast(){
+
+if(historyStack.length===0) return;
+
+const last=historyStack.pop();
+
+map.removeLayer(last);
+
+}
+
+document.addEventListener("keydown",function(e){
+
+if(e.ctrlKey && e.key==="z"){
+undoLast();
+}
 
 });
 
