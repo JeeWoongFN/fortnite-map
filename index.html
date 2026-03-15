@@ -20,15 +20,32 @@ width:100%;
 height:100%;
 }
 
-/* POI */
+/* POI 스타일 */
 
 .poi-label{
-background:rgba(0,0,0,0);
-border:none;
+background:none !important;
+border:none !important;
+box-shadow:none !important;
+padding:0 !important;
+
 color:white;
 font-size:18px;
 font-weight:bold;
-text-shadow:2px 2px 4px black,-2px -2px 4px black;
+
+text-shadow:
+2px 2px 4px black,
+-2px -2px 4px black,
+2px -2px 4px black,
+-2px 2px 4px black;
+}
+
+/* Leaflet tooltip 화살표 제거 */
+
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before{
+display:none !important;
 }
 
 /* 사이드바 */
@@ -49,7 +66,7 @@ gap:8px;
 box-shadow:0 0 15px rgba(0,0,0,0.6);
 }
 
-/* 버튼 기본 */
+/* 버튼 */
 
 #toolbar button{
 width:42px;
@@ -70,7 +87,7 @@ transform:scale(1.08);
 box-shadow:0 0 12px orange;
 }
 
-/* 선택 강조 */
+/* 선택된 도구 */
 
 .selectedTool{
 background:#444 !important;
@@ -135,6 +152,7 @@ map.setZoom(-0.3);
 /* POI */
 
 function addPOI(y,x,name){
+
 L.tooltip({
 permanent:true,
 direction:"center",
@@ -143,6 +161,7 @@ className:"poi-label"
 .setLatLng([y,x])
 .setContent(name)
 .addTo(map);
+
 }
 
 /* POI */
@@ -165,6 +184,7 @@ addPOI(614,1291,"클래시파이드 캐니언");
 /* 핑 아이콘 */
 
 const pingIcons={
+
 red:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -172,6 +192,7 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
+
 blue:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -179,6 +200,7 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
+
 green:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -186,6 +208,7 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 }),
+
 yellow:new L.Icon({
 iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png",
 shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -193,6 +216,7 @@ iconSize:[25,41],
 iconAnchor:[12,41],
 shadowSize:[41,41]
 })
+
 };
 
 /* 상태 */
@@ -218,8 +242,6 @@ if(previewLine){
 map.removeLayer(previewLine);
 previewLine=null;
 }
-
-/* 버튼 강조 */
 
 document.querySelectorAll("#toolbar button").forEach(b=>{
 b.classList.remove("selectedTool");
