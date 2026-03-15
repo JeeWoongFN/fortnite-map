@@ -73,6 +73,9 @@ margin-top:6px;
 
 <button onclick="setTool('ping',this)">📍</button>
 <button onclick="setTool('line',this)">📏</button>
+
+<button onclick="undoLast()">↶</button>
+<button onclick="redoLast()">↷</button>
 <button onclick="clearAll()">🗑</button>
 
 <div id="colorPicker">
@@ -182,13 +185,8 @@ let pingColor="red";
 let linePoints=[];
 let previewLine=null;
 
-/* Undo / Redo */
-
 let historyStack=[];
 let redoStack=[];
-
-/* 지도 요소 저장 */
-
 let drawnLayers=[];
 
 /* 도구 선택 */
@@ -238,6 +236,7 @@ map.removeLayer(layer);
 drawnLayers=[];
 historyStack=[];
 redoStack=[];
+linePoints=[];
 
 }
 
