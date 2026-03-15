@@ -250,9 +250,36 @@ return;
 
 /* 선 추가 */
 
-L.polyline([last,point],{
+const line = L.polyline([last,point],{
 color:pingColor,
 weight:4
+}).addTo(map);
+
+/* 우클릭 삭제 */
+
+line.on("contextmenu",function(){
+map.removeLayer(line);
+});
+/* 끝점 표시 */
+
+L.circleMarker(point,{
+radius:5,
+color:"#000",
+weight:2,
+fillColor:"#fff",
+fillOpacity:1
+}).addTo(map);
+
+}
+
+if(linePoints.length === 0){
+
+L.circleMarker(point,{
+radius:5,
+color:"#000",
+weight:2,
+fillColor:"#fff",
+fillOpacity:1
 }).addTo(map);
 
 }
