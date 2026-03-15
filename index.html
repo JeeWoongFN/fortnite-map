@@ -73,6 +73,7 @@ margin-top:6px;
 
 <button onclick="setTool('ping',this)">📍</button>
 <button onclick="setTool('line',this)">📏</button>
+<button onclick="clearAll()">🗑</button>
 
 <div id="colorPicker">
 <button onclick="setPingColor('red',this)">🔴</button>
@@ -181,10 +182,14 @@ let pingColor="red";
 let linePoints=[];
 let previewLine=null;
 
-/* Undo / Redo 스택 */
+/* Undo / Redo */
 
 let historyStack=[];
 let redoStack=[];
+
+/* 지도 요소 저장 */
+
+let drawnLayers=[];
 
 /* 도구 선택 */
 
@@ -208,7 +213,7 @@ btn.style.color="white";
 
 }
 
-/* 색상 선택 */
+/* 색상 */
 
 function setPingColor(color,btn){
 
@@ -219,6 +224,20 @@ b.style.outline="none";
 });
 
 btn.style.outline="3px solid white";
+
+}
+
+/* 전체 삭제 */
+
+function clearAll(){
+
+drawnLayers.forEach(layer=>{
+map.removeLayer(layer);
+});
+
+drawnLayers=[];
+historyStack=[];
+redoStack=[];
 
 }
 
@@ -236,6 +255,7 @@ const marker=L.marker(point,{
 icon:pingIcons[pingColor]
 }).addTo(map);
 
+drawnLayers.push(marker);
 historyStack.push(marker);
 redoStack=[];
 
@@ -270,6 +290,7 @@ color:pingColor,
 weight:4
 }).addTo(map);
 
+drawnLayers.push(line);
 historyStack.push(line);
 redoStack=[];
 
@@ -285,6 +306,7 @@ fillColor:"#fff",
 fillOpacity:1
 }).addTo(map);
 
+drawnLayers.push(dot);
 historyStack.push(dot);
 redoStack=[];
 
@@ -300,6 +322,7 @@ fillColor:"#fff",
 fillOpacity:1
 }).addTo(map);
 
+drawnLayers.push(dot);
 historyStack.push(dot);
 redoStack=[];
 
